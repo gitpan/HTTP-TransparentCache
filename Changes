@@ -1,3 +1,9 @@
+
+
+2004-10-30 Mattias Holmlund
+
+  Module renamed to HTTP::Cache::Transparent.
+
 2004-10-15 Mattias Holmlund
 
   Version 0.3

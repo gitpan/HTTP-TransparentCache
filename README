@@ -1,62 +1,7 @@
-HTTP-TransparentCache version 0.1
-============================
+HTTP-TransparentCache has been renamed to HTTP::Cache::Transparent by request
+from modules -at- perl -dot- org. Please use that module instead.
+It can be downloaded from CPAN at 
 
-HTTP::TransparentCache is an implementation of http get that keeps a local 
-cache of fetched pages to avoid fetching the same data from the server 
-if it hasn't been updated. The cache is stored on disk and is thus 
-persistent between invocations.
-
-The http-headers If-Modified-Since and ETag are used to let the server
-decide if the version in the cache is up-to-date or not.
-
-LIMITATIONS
-
-This module has a number of limitations that you should be aware of
-before using it.
-
-- Only get-requests are supported. No special http-headers or cookies 
-  can be used.
-
-- There is no upper limit to how much diskspace the cache requires. The
-  only limiting mechanism is that data for urls that haven't been requested
-  in the last MaxAge hours will be removed from the cache the next time
-  the cache-object is created.
-
-- The result of the http get is always stored in memory, and sometimes
-  twice (or more depending on how LWP actually works). This means that 
-  this module shouldn't be used to fetch extremely large files via http.
-
-- If two different processes using the same cache-directory and try to
-  fetch the same url at the same time, bad things can happen. Otherwise,
-  it should be safe to share the cache-directory between several processes,
-  since each object in the cache is stored in a separate file and there
-  is no single file that is always read.
-
-INSTALLATION
-
-To install this module type the following:
-
-   perl Makefile.PL
-   make
-   make test
-   make install
-
-DEPENDENCIES
-
-LWP
-Storable    (included with perl)
-Digest::MD5 (included with perl)
-
-All http-requests are made through the LWP module. Data is stored on disk
-by the Storable module. Digest::MD5 is used for creating a hash of the
-url.
-
-COPYRIGHT AND LICENCE
-
-Copyright (C) 2004 by Mattias Holmlund
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.4 or,
-at your option, any later version of Perl 5 you may have available.
-
+  http://search.cpan.org/dist/HTTP-Cache-Transparent
+ 
 
