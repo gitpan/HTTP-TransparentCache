@@ -2,7 +2,7 @@ package HTTP::TransparentCache;
 
 use strict;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 =head1 NAME
 
@@ -32,13 +32,13 @@ decide if the version in the cache is up-to-date or not.
 The cache is implemented by modifying the LWP::UserAgent class to
 seamlessly cache the result of all requests that can be cached.
 
-=head1 METHODS
+=head1 INITIALIZING THE CACHE
 
 HTTP::TransparentCache provides an init-method that sets the
-parameters for the cache and overloads a method in LWP::UserAgent.
-After init has been called, the normal LWP-methods (LWP::Simple as
-well as the more full-fledged LWP::Request methods) should be used
-as usual.
+parameters for the cache and overloads a method in LWP::UserAgent
+to activate the cache.After init has been called, the normal 
+LWP-methods (LWP::Simple as well as the more full-fledged 
+LWP::Request methods) should be used as usual.
 
 =over 4
 
@@ -106,6 +106,42 @@ sub init
     no warnings;
     *LWP::UserAgent::simple_request = \&simple_request_cache
   }
+}
+
+=item Initializing from use-line
+
+An alternative way of initializing HTTP::TransparentCache is to supply
+parameters in the use-line. This allows you to write
+
+  use HTTP::TransparentCache ( BasePath => '/tmp/cache' );
+
+which is exactly equivalent to
+
+  use HTTP::TransparentCache;
+  HTTP::TransparentCache::init( BasePath => '/tmp/cache' );
+
+The advantage to using this method is that you can do
+
+  perl -MHTTP::TransparentCache=BasePath,/tmp/cache myscript.pl
+
+or even set the environment variable PERL5OPT 
+  
+  PERL5OPT=-MHTTP::TransparentCache=BasePath,/tmp/cache
+  myscript.pl
+
+and have all the http-requests performed by myscript.pl go through the
+cache without changing myscript.pl
+
+=back
+
+=cut 
+
+sub import
+{
+  my( $module, %args ) = @_;
+  return if (scalar(keys(%args)) == 0);
+
+  HTTP::TransparentCache::init( \%args );
 }
 
 END
@@ -309,6 +345,8 @@ This header is inserted and set to 1 if the content returned is the same
 as the content returned the last time this url was fetched. This header
 is always inserted and set to 1 when the response is delivered from 
 the cache.
+
+=back
 
 =head1 LIMITATIONS
 

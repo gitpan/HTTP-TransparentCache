@@ -1,2 +1,6 @@
+2004-10-11 Mattias Holmlund
+  
+  Release 0.2
 
-
+  Support initialization via use directive.
+  Lower perl requirements to Perl 5.6.1.
