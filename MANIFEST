@@ -1,0 +1,8 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/HTTP-TransparentCache.t
+lib/HTTP/TransparentCache.pm
+examples/check_server
+META.yml                                 Module meta-data (added by MakeMaker)
