@@ -2,7 +2,7 @@ package HTTP::TransparentCache;
 
 use strict;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 =head1 NAME
 
@@ -67,7 +67,7 @@ hashref containing named arguments to the object.
     BasePath  => "/tmp/cache", # Directory to store the cache in. 
     MaxAge    => 8*24,         # How many hours should items be
                                # kept in the cache after they 
-                               # were last accessed?
+                               # were last requested?
                                # Default is 8*24.
     Verbose   => 1,            # Print progress-messages to STDERR. 
                                # Default is 0.
@@ -88,7 +88,7 @@ sub init
   $basepath = $arg->{BasePath};
 
   -d $basepath
-    or croak( $basepath ."is not a directory" ); 
+    or croak( "$basepath is not a directory" ); 
 
   # Append a trailing slash if it is missing.
   $basepath =~ s%([^/])$%$1/%;
@@ -210,7 +210,15 @@ sub simple_request_cache
       utime( $mtime, $mtime, $filename );
 
       # modify response
-      $res->content_ref( \$content );
+      if( $HTTP::Message::VERSION >= 1.44 )
+      {
+        $res->content_ref( \$content );
+      }
+      else
+      {
+        $res->content( $content );
+      }
+
       $res->code( RC_OK );
       $res->header( "X-Cached", 1 );
       $res->header( "X-Content-Unchanged", 1 );
@@ -231,7 +239,8 @@ sub simple_request_cache
       print STDERR " from server.\n"
         if( $verbose );
 
-      write_cache_entry( $filename, $url, $res );
+      write_cache_entry( $filename, $url, $res )
+        if( $res->code == RC_OK );
     }
   }
   else
@@ -316,7 +325,11 @@ sub remove_old_entries
     my @files = glob($basepath . "*");
     foreach my $file (@files)
     {
-      if( (-M($file))*24 > $maxage )
+      if( $file !~ m%/[0-9a-f]{32}$% )
+      {
+        print STDERR "HTTP::TransparentCache: Unknown file found in cache directory: $file\n";
+      }
+      elsif( (-M($file))*24 > $maxage )
       {
         print STDERR "Deleting $file.\n"
           if( $verbose );
@@ -370,6 +383,16 @@ delivered via a callback) is cached. I intend to remove this limitation
 in a future version.
 
 =back
+
+=head1 CACHE FORMAT
+
+The cache is stored on disk as one file per cached object. The filename
+is equal to the md5sum of the url. The file contains a set of 
+key/value-pairs with metadata (one entry per line) followed by a blank 
+line and then the actual data returned by the server.
+
+The last modified date of the cache file is set to the time when the
+cache object was last requested by a user.
 
 =head1 AUTHOR
 
